@@ -4,10 +4,9 @@ import 'dotenv/config';
 import cookieParser from 'cookie-parser';
 import express from 'express';
 import userRoutes from './routes/userRoutes.js';
-import courseRoutes from './routes/courseRoutes.js'
-
-
-
+import courseRoutes from './routes/courseRoutes.js';
+import miscRoutes from './routes/miscRoutes.js'
+import paymentRoutes from './routes/paymentRoutes.js'
 import errorMiddleware from './middlewares/errorMiddleware.js';
 
 const app=express();
@@ -29,12 +28,16 @@ app.use('/ping',(req,res)=>{
     res.send('pong');
 })
 
-// Routes of 3 modules
+
 
 app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/courses',courseRoutes)
+app.use('/api/v1/contact',miscRoutes)
+app.use('/api/v1/payment',paymentRoutes)
 
-// 404 Error Handler
+
+
+
 app.use((req, res, next) => {
   const error = new Error("Route Not Found");
   error.statusCode = 404;

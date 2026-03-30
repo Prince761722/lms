@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 const { Schema, model } = mongoose;
 
-
 const courseSchema = new Schema({
     title: {
         type: String,
@@ -11,45 +10,50 @@ const courseSchema = new Schema({
     },
     description: {
         type: String,
-        required: [true, 'Discription is required'],
-        minLength: [8, 'Description must be atleast 8 charcters'],
+        required: true,
+        minLength: [8, 'Description must be atleast 8 characters'],
         maxLength: [400, 'Description cannot exceed 400 characters']
     },
     category: {
         type: String,
-        required: [true, 'Category is required']
+        required: true
     },
-    thumbnail: {
-        public_id: {
-            type: String
-        },
 
-        secure_url: { type: String },
+    // COURSE THUMBNAIL
+    thumbnail: {
+        public_id: String,
+        secure_url: String
     },
+
+    // 🔥 FIXED LECTURES
     lectures: [
         {
             title: String,
             description: String,
-            lecture: {
-                public_id: { type: String ,required: true},
-                secure_url: { type: String, required: true }
-            }
 
+            lecture: {
+                public_id: { type: String, required: true },
+                secure_url: { type: String, required: true }
+            },
+
+            // ✅ REQUIRED FOR PREVIEW
+            thumbnail: {
+                public_id: String,
+                secure_url: String
+            }
         }
     ],
+
     numbersOfLectures: {
         type: Number,
         default: 0
     },
+
     createdBy: {
         type: String,
-        required: [true, 'Creator name is required']
+        required: true
     }
-}, {
-    timestamps: true
-})
 
-const courseModel = model("Course", courseSchema);
+}, { timestamps: true });
 
-export default courseModel;
-
+export default model("Course", courseSchema);

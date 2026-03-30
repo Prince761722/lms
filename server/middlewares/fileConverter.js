@@ -2,24 +2,32 @@ import path from "path";
 import multer from "multer";
 
 const upload = multer({
-    dest:"uploads/",
-    limits:{fileSize:50*1024*1024},
-    storage:multer.diskStorage({
-        destination:("uploads/"),
-        filename:(_req,file,cb)=>{
-            cb(null,file.originalname);
-            },
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50MB
 
-        }),
-
-    fileFilter:(_req,file,cb)=>{
-        let ext=path.extname(file.originalname);
-        if(ext!==".jpg" && ext!==".jpeg" && ext!==".png"&& ext!==".webp"&& ext!==".mp4"&& ext!==".gif"){
-            cb(new Error(`Only .jpg, .jpeg, .png, .mp4 and .gif format allowed!${ext}`,false));
-            return;
-        }
-        cb(null,true);
+  storage: multer.diskStorage({
+    destination: "uploads/",
+    filename: (_req, file, cb) => {
+      const uniqueName = Date.now() + "-" + file.originalname;
+      cb(null, uniqueName);
     },
+  }),
+
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (
+      ext !== ".jpg" &&
+      ext !== ".jpeg" &&
+      ext !== ".png" &&
+      ext !== ".webp" &&
+      ext !== ".mp4" &&
+      ext !== ".gif"
+    ) {
+      return cb(new Error(`Only images & mp4 allowed! ${ext}`));
+    }
+
+    cb(null, true);
+  },
 });
 
 export default upload;
