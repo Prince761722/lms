@@ -9,18 +9,17 @@ import { getAllCourses } from "../../redux/slice/courseSlice";
 function CourseList() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
+
     const { courseData, loading } = useSelector((state) => state.course);
+    const role = useSelector((state) => state.auth?.data?.role);
+
     const [searchQuery, setSearchQuery] = useState("");
 
-  
-    const role = useSelector((state) => state.auth?.data?.role);
     const isAdmin = role === "admin";
+    const isCreator = role === "creator";
 
     useEffect(() => {
-        async function loadCourses() {
-            await dispatch(getAllCourses());
-        }
-        loadCourses();
+        dispatch(getAllCourses());
     }, [dispatch]);
 
     const filteredCourses = courseData?.filter((course) =>
@@ -33,7 +32,7 @@ function CourseList() {
             <div className="min-h-screen bg-[#0a0a0f] text-white px-4 sm:px-8 py-14">
                 <div className="max-w-7xl mx-auto">
 
-                   
+                    {/* Header */}
                     <span className="inline-flex items-center bg-yellow-500/10 border border-yellow-500/20 text-yellow-400 text-[0.7rem] font-semibold uppercase tracking-widest px-3 py-1 rounded-full">
                         {loading ? "Loading..." : `${filteredCourses?.length ?? 0} Courses`}
                     </span>
@@ -45,26 +44,29 @@ function CourseList() {
                         </span>
                     </h1>
 
-                    
                     <p className="text-white/45 text-sm sm:text-base font-light max-w-lg mb-8">
                         Level up your skills with expert-curated content built for real-world results.
                     </p>
 
-                   
                     <div className="h-px bg-linear-to-r from-yellow-500/40 via-yellow-500/10 to-transparent mb-8" />
 
-                    
+                    {/* Search + Button */}
                     <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-10">
 
-                        
                         <div className="relative flex-1">
                             <svg
                                 className="absolute left-4 top-1/2 -translate-y-1/2 text-white/30 pointer-events-none"
-                                width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"
+                                width="15"
+                                height="15"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                viewBox="0 0 24 24"
                             >
                                 <circle cx="11" cy="11" r="8" />
                                 <path d="m21 21-4.35-4.35" />
                             </svg>
+
                             <input
                                 type="text"
                                 placeholder="Search courses or categories…"
@@ -74,13 +76,19 @@ function CourseList() {
                             />
                         </div>
 
-                        
-                        {isAdmin && (
+                        {(isAdmin || isCreator) && (
                             <button
                                 onClick={() => navigate("/course/create")}
                                 className="flex items-center justify-center gap-2 bg-yellow-400 hover:bg-yellow-300 active:scale-95 text-black font-bold text-sm px-5 py-3 rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-yellow-500/25 cursor-pointer whitespace-nowrap"
                             >
-                                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                                <svg
+                                    width="15"
+                                    height="15"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2.5"
+                                    viewBox="0 0 24 24"
+                                >
                                     <path d="M12 5v14M5 12h14" />
                                 </svg>
                                 Create Course
@@ -88,7 +96,7 @@ function CourseList() {
                         )}
                     </div>
 
-                   
+                    {/* Courses Grid */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
 
                         {loading ? (
@@ -109,11 +117,13 @@ function CourseList() {
                                 <div className="w-16 h-16 bg-white/[0.04] border border-white/10 rounded-2xl flex items-center justify-center text-3xl">
                                     📭
                                 </div>
+
                                 <p className="text-white/50 text-base">
                                     {searchQuery
                                         ? `No courses found for "${searchQuery}"`
                                         : "No courses available yet."}
                                 </p>
+
                                 {searchQuery && (
                                     <button
                                         onClick={() => setSearchQuery("")}

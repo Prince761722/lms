@@ -1,14 +1,30 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { requestCreatorAccess } from "../../redux/slice/creatorSlice";
 
 function CourseDescription() {
   const location = useLocation();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const course = location.state;
+ 
 
-  const { isLoggedIn, role } = useSelector((state) => state.auth);
-  const isAdmin = isLoggedIn && role?.toLowerCase() === "admin";
+  // ✅ AUTH DATA
+  const { isLoggedIn, role, data } = useSelector((state) => state.auth);
+  const userId = data?._id || data?.id;
+  const isCourseOwner = isLoggedIn && course?.createdBy === userId;
+
+  const userRole = role?.toLowerCase();
+
+  const isAdmin = isLoggedIn && userRole === "admin";
+  const isCreator = isLoggedIn && userRole === "creator";
+
+  // ✅ SUBSCRIPTION CHECK (FIXED)
+  const isSubscribed = data?.subscription?.status === "active";
+
+  // ✅ CREATOR REQUEST STATUS
+  const isRequestPending = data?.creatorRequest?.status === "pending";
 
   if (!course) {
     return (
@@ -45,7 +61,6 @@ function CourseDescription() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white">
-
       <div className="max-w-[1100px] mx-auto px-6 py-10">
 
         {/* BACK */}
@@ -58,7 +73,7 @@ function CourseDescription() {
 
         <div className="grid md:grid-cols-2 gap-12">
 
-          {/* LEFT IMAGE */}
+          {/* IMAGE */}
           <div className="rounded-xl overflow-hidden border border-white/10">
             <img
               src={course?.thumbnail?.secure_url}
@@ -67,9 +82,8 @@ function CourseDescription() {
             />
           </div>
 
-          {/* RIGHT DETAILS */}
+          {/* DETAILS */}
           <div className="flex flex-col gap-6">
-
             <h1 className="text-3xl font-bold">{course.title}</h1>
 
             <p className="text-white/50">{course.description}</p>
@@ -95,39 +109,64 @@ function CourseDescription() {
             >
               Enroll Now
             </button>
-
           </div>
         </div>
 
-        {/* ===== LECTURE NAVIGATION ===== */}
+        {/* ===== LECTURES & ROLE ACTIONS ===== */}
         <div className="mt-16">
-
-          <h2 className="text-xl font-bold mb-6">Course Lectures</h2>
+          <h2 className="text-xl font-bold mb-6">Course Actions</h2>
 
           <div className="grid md:grid-cols-2 gap-4">
 
-            {/* VIEW LECTURES */}
-            <button
-              onClick={() => navigate(`/lecture/${course._id}`)}
-              className="bg-blue-500 hover:bg-blue-400 py-4 rounded-xl font-bold"
-            >
-              📺 View Lectures
-            </button>
-
-            {/* ADD LECTURE */}
-            {isAdmin && (
+            {/* 🎥 VIEW / LOCK */}
+            {isAdmin || isSubscribed || isCourseOwner? (
               <button
-                onClick={() =>
-                  navigate(`/lecture/add/${course._id}`)
-                }
+                onClick={() => navigate(`/lecture/${course._id}`)}
+               
+                className="bg-blue-500 hover:bg-blue-400 py-4 rounded-xl font-bold"
+              >
+                📺 View Lectures
+              </button>
+            ) : (
+              <button
+                onClick={() => navigate("/payment/checkout")}
+                className="bg-gray-600 hover:bg-gray-500 py-4 rounded-xl font-bold"
+              >
+                🔒 Subscribe to Unlock
+              </button>
+            )}
+
+            {/* 👤 NORMAL USER → BECOME CREATOR */}
+            {userRole === "user" && !isRequestPending && (
+              <button
+                onClick={() => dispatch(requestCreatorAccess())}
+                className="bg-purple-500 hover:bg-purple-400 py-4 rounded-xl font-bold"
+              >
+                🚀 Become Creator
+              </button>
+            )}
+
+            {/* ⏳ REQUEST PENDING */}
+            {userRole === "user" && isRequestPending && (
+              <button
+                disabled
+                className="bg-gray-500 py-4 rounded-xl font-bold cursor-not-allowed"
+              >
+                ⏳ Request Pending
+              </button>
+            )}
+
+            {/* 👨‍💼 CREATOR + ADMIN → ADD COURSE */}
+            {(isAdmin || isCourseOwner) && (
+              <button
+                onClick={() => navigate("/lecture/add/:courseId")}
                 className="bg-yellow-400 hover:bg-yellow-300 text-black py-4 rounded-xl font-bold"
               >
-                ➕ Add Lecture
+                ➕ add leactures
               </button>
             )}
 
           </div>
-
         </div>
       </div>
     </div>

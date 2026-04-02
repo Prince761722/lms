@@ -8,6 +8,7 @@ import courseRoutes from './routes/courseRoutes.js';
 import miscRoutes from './routes/miscRoutes.js'
 import paymentRoutes from './routes/paymentRoutes.js'
 import errorMiddleware from './middlewares/errorMiddleware.js';
+import multiCreatorRoutes from './routes/multiCreatorRoutes.js'
 
 const app=express();
 app.use(express.json());
@@ -34,6 +35,7 @@ app.use('/api/v1/user',userRoutes);
 app.use('/api/v1/courses',courseRoutes)
 app.use('/api/v1/contact',miscRoutes)
 app.use('/api/v1/payment',paymentRoutes)
+app.use('/api/v1/creator',multiCreatorRoutes)
 
 
 

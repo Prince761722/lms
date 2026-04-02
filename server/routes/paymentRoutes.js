@@ -1,23 +1,46 @@
-import { Router } from 'express';
-import { isLoggedIn } from '../middlewares/authMiddleware.js';
+import express from "express";
 import {
   getRozorpayApiKey,
   buySubscription,
   verifySubscription,
   unsubscribe,
   allPayment
-} from '../controllers/paymentController.js';
+} from "../controllers/paymentController.js";
 
-const router = Router();
+import { isLoggedIn, authorizedRoles } from "../middlewares/authMiddleware.js";
 
-router.get('/razorpay-key', isLoggedIn, getRozorpayApiKey);
+const router = express.Router();
 
-router.post('/subscribe', isLoggedIn, buySubscription);
+//  USER ONLY
+router.get("/razorpay-key", isLoggedIn, getRozorpayApiKey);
 
-router.post('/verify', isLoggedIn, verifySubscription);
+router.post(
+  "/subscribe",
+  isLoggedIn,
+  authorizedRoles("user"), //  ONLY USER CAN SUBSCRIBE
+  buySubscription
+);
 
-router.post('/unsubscribe', isLoggedIn, unsubscribe);
+router.post(
+  "/verify",
+  isLoggedIn,
+  authorizedRoles("user"), //  ONLY USER CAN VERIFY
+  verifySubscription
+);
 
-router.get('/', isLoggedIn, allPayment);
+router.post(
+  "/unsubscribe",
+  isLoggedIn,
+  authorizedRoles("user"),
+  unsubscribe
+);
+
+//  ADMIN ONLY
+router.get(
+  "/all",
+  isLoggedIn,
+  authorizedRoles("admin"),
+  allPayment
+);
 
 export default router;

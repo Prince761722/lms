@@ -23,6 +23,7 @@ import PaymentFailed from './pages/Payment/PaymentFailed';
 import AddLecture from './pages/Leactures/AddLeacture';
 import DisplayLeacture from './pages/Leactures/DisplayLeacture';
 import WatchLecture from './pages/Leactures/WatchLexture';
+import CreatorDashboard from './pages/CreatorDashboard';
 
 function App() {
   return (
@@ -42,17 +43,36 @@ function App() {
         <Route path="/denied" element={<Denied />} />
         <Route path="*" element={<NotFound />} />
 
-        {/* USER + ADMIN */}
-        <Route element={<RequireAuth allowedRoles={["user", "admin"]} />}>
+        {/* AUTHENTICATED USERS (ALL ROLES) */}
+        <Route element={<RequireAuth allowedRoles={["user", "admin", "creator"]} />}>
 
           <Route path="/user/profile" element={<Profile />} />
           <Route path="/user/profile/edit" element={<EditProfile />} />
 
+        </Route>
+
+        {/* USER ONLY (paid features) */}
+        <Route element={<RequireAuth allowedRoles={["user"]} />}>
+
           <Route path="/payment/checkout" element={<Checkout />} />
           <Route path="/payment/success" element={<PaymentSucess />} />
           <Route path="/payment/failed" element={<PaymentFailed />} />
+
+        </Route>
+
+        {/* USER + CREATOR + ADMIN (course access) */}
+        <Route element={<RequireAuth allowedRoles={["user", "creator", "admin"]} />}>
+
           <Route path="/lecture/:courseId" element={<DisplayLeacture />} />
           <Route path="/lecture/watch/:courseId/:lectureId" element={<WatchLecture />} />
+
+        </Route>
+
+        {/* CREATOR + ADMIN */}
+        <Route element={<RequireAuth allowedRoles={["creator", "admin"]} />}>
+
+          <Route path="/course/create" element={<CreateCourse />} />
+          <Route path="/lecture/add/:courseId" element={<AddLecture />} />
 
         </Route>
 
@@ -60,8 +80,12 @@ function App() {
         <Route element={<RequireAuth allowedRoles={["admin"]} />}>
 
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-          <Route path="/course/create" element={<CreateCourse />} />
-          <Route path="/lecture/add/:courseId" element={<AddLecture />} />
+
+        </Route>
+        <Route element={<RequireAuth allowedRoles={["creator"]} />}>
+
+          // inside CREATOR + ADMIN route group
+          <Route path="/creator/dashboard" element={<CreatorDashboard />} />
 
         </Route>
 

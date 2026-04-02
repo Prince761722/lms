@@ -13,6 +13,7 @@ function HomeLayout({ children }) {
 
     const isLoggedIn = useSelector((state) => state?.auth?.isLoggedIn);
     const role = useSelector((state) => state?.auth?.role);
+    
 
     function closeDrawer() {
         const drawer = document.getElementById("my-drawer");
@@ -71,6 +72,11 @@ function HomeLayout({ children }) {
                         {isLoggedIn && role === "admin" && (
                             <li onClick={closeDrawer}>
                                 <Link to="/admin/dashboard">Admin Dashboard</Link>
+                            </li>
+                        )}
+                        {isLoggedIn && role === "creator" && (
+                            <li onClick={closeDrawer}>
+                                <Link to="/creator/dashboard">Creator Dashboard</Link>
                             </li>
                         )}
 

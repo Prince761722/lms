@@ -12,7 +12,6 @@ function CreateCourse() {
     const [userInput, setUserInput] = useState({
         title: "",
         category: "",
-        createdBy: "",
         description: "",
         thumbnail: null,
         previewImage: ""
@@ -52,8 +51,7 @@ function CreateCourse() {
             !userInput.title ||
             !userInput.description ||
             !userInput.category ||
-            !userInput.thumbnail ||
-            !userInput.createdBy
+            !userInput.thumbnail
         ) {
             toast.error("All Fields are Mandatory");
             return;
@@ -65,7 +63,6 @@ function CreateCourse() {
             setUserInput({
                 title: "",
                 category: "",
-                createdBy: "",
                 description: "",
                 thumbnail: null,
                 previewImage: ""
@@ -116,16 +113,7 @@ function CreateCourse() {
                     />
 
                     
-                    <input
-                        type="text"
-                        name="createdBy"
-                        value={userInput.createdBy}
-                        onChange={handleUserInput}
-                        placeholder="Instructor Name"
-                        className="w-full p-3 rounded-lg bg-gray-900 border border-gray-700 focus:ring-2 focus:ring-yellow-500 outline-none"
-                    />
-
-                   
+                
                     <textarea
                         name="description"
                         value={userInput.description}

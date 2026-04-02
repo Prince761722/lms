@@ -55,11 +55,30 @@ const userSchema = new mongoose.Schema({
     }
   },
 
-  role: {
+  subscription: {
+  id: {
     type: String,
-    enum: ['user', 'admin'],
-    default: 'user'
   },
+  status: {
+    type: String,
+    default: "inactive",
+  },
+},
+
+role: {
+  type: String,
+  enum: ["user", "admin", "creator"],
+  default: "user",
+},
+
+creatorRequest: {
+  status: {
+    type: String,
+    enum: ["none", "pending", "approved", "rejected"],
+    default: "none",
+  },
+  requestedAt: Date,
+},
 
   forgetpasswordtoken: String,
   forgetpasswordexpiry: Date,

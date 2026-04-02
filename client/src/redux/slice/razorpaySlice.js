@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
 import toast from "react-hot-toast";
 import axiosInstance from "../../helpers/axiosInstance";
 
@@ -23,7 +22,7 @@ export const buySubscription = createAsyncThunk(
   "payment/buySubscription",
   async (_, thunkAPI) => {
     try {
-      const res = await axiosInstance.post("/subscribe"); // ✅ FIX: POST
+      const res = await axiosInstance.post("/payment/subscribe"); // ✅ FIX: POST
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);
@@ -62,7 +61,7 @@ export const fetchDashboardData = createAsyncThunk(
   "payment/dashboard",
   async (_, thunkAPI) => {
     try {
-      const res = await axiosInstance.get("/payment/");
+      const res = await axiosInstance.get("/payment/all");
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);
@@ -86,15 +85,13 @@ const initialState = {
   monthlyStats: [],
   yearlyStats: [],
   recentPayments: [],
-
   allPayments: [],
 
   loading: false,
   error: null,
 };
 
-
-//  SLICE 
+// SLICE
 
 const paymentSlice = createSlice({
   name: "payment",
@@ -109,59 +106,100 @@ const paymentSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
-      //  GET KEY 
+
+      // GET RAZORPAY KEY
+   
+      .addCase(getRazorpayKey.fulfilled, (state, action) => {
+        state.key = action.payload?.key || action.payload;
+      })
+
       .addCase(getRazorpayKey.rejected, (_, action) => {
         toast.error(action.payload || "Failed to get key");
       })
 
-
-      // SUBSCRIBE 
-      .addCase(buySubscription.pending, () => {
+      // SUBSCRIBE
+    
+      .addCase(buySubscription.pending, (state) => {
+        state.loading = true;
         toast.loading("Creating subscription...");
       })
+
       .addCase(buySubscription.fulfilled, (state, action) => {
+        state.loading = false;
         toast.dismiss();
         toast.success("Subscription created");
 
         state.subscription_id = action.payload.subscription_id;
       })
-      .addCase(buySubscription.rejected, (_, action) => {
+
+      .addCase(buySubscription.rejected, (state, action) => {
+        state.loading = false;
         toast.dismiss();
         toast.error(action.payload || "Subscription failed");
       })
 
-
-      //  VERIFY 
-      .addCase(verifyPayment.pending, () => {
+     
+      // VERIFY PAYMENT
+    
+      .addCase(verifyPayment.pending, (state) => {
+        state.loading = true;
         toast.loading("Verifying payment...");
       })
+
       .addCase(verifyPayment.fulfilled, (state) => {
+        state.loading = false;
         toast.dismiss();
         toast.success("Payment verified successfully");
 
         state.isPaymentVerified = true;
       })
-      .addCase(verifyPayment.rejected, (_, action) => {
+
+      .addCase(verifyPayment.rejected, (state, action) => {
+        state.loading = false;
         toast.dismiss();
         toast.error(action.payload || "Payment verification failed");
       })
 
-
-      //  CANCEL 
+      // CANCEL SUBSCRIPTION
+   
       .addCase(cancelSubscription.fulfilled, () => {
         toast.success("Subscription cancelled");
       })
+
       .addCase(cancelSubscription.rejected, (_, action) => {
         toast.error(action.payload || "Cancel failed");
       })
 
+      // DASHBOARD DATA
+    
+      .addCase(fetchDashboardData.pending, (state) => {
+        state.loading = true;
+      })
 
-      // DASHBOARD 
-      .addCase(fetchDashboardData.rejected, (_, action) => {
+      .addCase(fetchDashboardData.fulfilled, (state, action) => {
+        state.loading = false;
+
+        //  HANDLE BOTH CASES (payload OR payload.data)
+        const data = action.payload?.data || action.payload;
+
+        //  SAFE ASSIGNMENT
+        state.overview = data?.overview || {
+          totalRevenue: 0,
+          totalPayments: 0,
+        };
+
+        state.monthlyStats = data?.monthlyStats || [];
+        state.yearlyStats = data?.yearlyStats || [];
+        state.recentPayments = data?.recentPayments || [];
+      })
+
+      .addCase(fetchDashboardData.rejected, (state, action) => {
+        state.loading = false;
         toast.error(action.payload || "Failed to load dashboard");
       });
   },
 });
+
 
 
 export const { clearPaymentState } = paymentSlice.actions;

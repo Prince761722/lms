@@ -65,7 +65,7 @@ const register = async (req, res, next) => {
         await user.save();
         user.password = undefined;
 
-        const token = user.getJWTToken();
+        const token =await user.getJWTToken();
         res.cookie("token", token, cookieOptions);
 
         return res.status(201).json({

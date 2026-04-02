@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { isLoggedIn, authorizedRoles } from '../middlewares/authMiddleware.js';
+import { isLoggedIn, authorizedRoles, isSubscribed, isCourseOwner, isSubscribedOrOwner, isAdminOrOwner } from '../middlewares/authMiddleware.js';
 import upload from "../middlewares/fileConverter.js";
 
 import {
@@ -14,41 +14,33 @@ import {
 
 const router = Router();
 
-
-
 router.route('/')
   .get(isLoggedIn, getAllCourses)
   .post(
     isLoggedIn,
-    authorizedRoles('admin'),
+    authorizedRoles('admin', 'creator'), 
     upload.single('thumbnail'),
     createCourse
   );
 
-
-
 router.route('/:id')
-  .get(isLoggedIn, getCourseLectures)
-  .put(isLoggedIn, authorizedRoles('admin'), updateCourse)
-  .delete(isLoggedIn, authorizedRoles('admin'), removeCourse);
-
-
+  .get(isLoggedIn, isSubscribedOrOwner, getCourseLectures)
+  .put(isLoggedIn, isAdminOrOwner, updateCourse)
+  .delete(isLoggedIn, isAdminOrOwner, removeCourse);
 
 router.post(
   '/:id/lecture',
   isLoggedIn,
-  authorizedRoles('admin'),
-  upload.single('lecture'), 
+  isAdminOrOwner,
+  upload.single('lecture'),
   addLectureByCourseId
 );
-
 
 router.delete(
   '/:courseId/lecture/:lectureId',
   isLoggedIn,
-  authorizedRoles('admin'),
+  isAdminOrOwner,
   removeLecture
 );
-
 
 export default router;

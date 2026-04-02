@@ -46,49 +46,52 @@ const getCourseLectures = async (req, res, next) => {
 
 // CREATE COURSE 
 const createCourse = async (req, res, next) => {
-    try {
-        const { title, description, category, createdBy } = req.body;
+  try {
+    const { title, description, category } = req.body;
 
-        if (!title || !description || !category || !createdBy) {
-            return next(new appError("All fields are required", 400));
-        }
-
-        const course = await Course.create({
-            title,
-            description,
-            category,
-            createdBy,
-            thumbnail: {}
-        });
-
-        if (req.file) {
-            const result = await cloudinary.v2.uploader.upload(
-                req.file.path,
-                {
-                    folder: "lms/courses",
-                    resource_type: "image" // ✅ image
-                }
-            );
-
-            course.thumbnail.public_id = result.public_id;
-            course.thumbnail.secure_url = result.secure_url;
-
-            await fs.promises.rm(req.file.path);
-        }
-
-        await course.save();
-
-        res.status(201).json({
-            success: true,
-            message: "Course created successfully",
-            course,
-        });
-
-    } catch (error) {
-        next(error);
+    if (!title || !description || !category) {
+      return next(new appError("All fields are required", 400));
     }
-};
 
+   
+    const createdBy = req.user.id;
+
+    const course = await Course.create({
+      title,
+      description,
+      category,
+      createdBy, 
+      thumbnail: {},
+    });
+
+    // IMAGE UPLOAD
+    if (req.file) {
+      const result = await cloudinary.v2.uploader.upload(
+        req.file.path,
+        {
+          folder: "lms/courses",
+          resource_type: "image",
+        }
+      );
+
+      course.thumbnail.public_id = result.public_id;
+      course.thumbnail.secure_url = result.secure_url;
+
+      await fs.promises.rm(req.file.path);
+    }
+
+    await course.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Course created successfully",
+      course,
+    });
+
+  } catch (error) {
+    next(error);
+  }
+};
 
 //  UPDATE COURSE 
 const updateCourse = async (req, res, next) => {
