@@ -1,11 +1,16 @@
 import appError from "../utils/errorUtil.js";
 import jwt from "jsonwebtoken";
 import Course from '../models/courseModel.js';
-import User from '../models/userModel.js'; // ✅ NEW
+import User from '../models/userModel.js';
 
 const isLoggedIn = (req, res, next) => {
   try {
-    const { token } = req.cookies;
+    // check cookie first, then Authorization header
+    let token = req.cookies.token;
+
+    if (!token && req.headers.authorization) {
+      token = req.headers.authorization.split(" ")[1];
+    }
 
     if (!token) {
       return next(new appError("Please login to access this resource", 401));
@@ -27,7 +32,6 @@ const authorizedRoles = (...roles) => async (req, res, next) => {
   next();
 };
 
-// ✅ FIXED — fetch fresh user from DB instead of relying on JWT
 const isSubscribed = async (req, res, next) => {
   try {
     const user = await User.findById(req.user.id);
@@ -68,7 +72,6 @@ const isCourseOwner = async (req, res, next) => {
   }
 };
 
-// ✅ FIXED — fetch fresh user from DB instead of relying on JWT
 const isSubscribedOrOwner = async (req, res, next) => {
   try {
     const freshUser = await User.findById(req.user.id);
