@@ -11,31 +11,31 @@ import { isLoggedIn, authorizedRoles } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-//  USER ONLY
+// ✅ FIXED — added "creator" to all user payment routes
 router.get("/razorpay-key", isLoggedIn, getRozorpayApiKey);
 
 router.post(
   "/subscribe",
   isLoggedIn,
-  authorizedRoles("user"), //  ONLY USER CAN SUBSCRIBE
+  authorizedRoles("user", "creator"), // ✅ creator can subscribe
   buySubscription
 );
 
 router.post(
   "/verify",
   isLoggedIn,
-  authorizedRoles("user"), //  ONLY USER CAN VERIFY
+  authorizedRoles("user", "creator"), // ✅ creator can verify
   verifySubscription
 );
 
 router.post(
   "/unsubscribe",
   isLoggedIn,
-  authorizedRoles("user"),
+  authorizedRoles("user", "creator"), // ✅ creator can unsubscribe
   unsubscribe
 );
 
-//  ADMIN ONLY
+// ADMIN ONLY
 router.get(
   "/all",
   isLoggedIn,

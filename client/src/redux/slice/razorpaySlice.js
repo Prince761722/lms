@@ -22,7 +22,7 @@ export const buySubscription = createAsyncThunk(
   "payment/buySubscription",
   async (_, thunkAPI) => {
     try {
-      const res = await axiosInstance.post("/payment/subscribe"); // ✅ FIX: POST
+      const res = await axiosInstance.post("/payment/subscribe"); 
       return res.data;
     } catch (err) {
       return thunkAPI.rejectWithValue(err.response?.data?.message);

@@ -1,23 +1,26 @@
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import HomeLayout from "../../Layouts/homeLayout";
+import { getProfileAction } from "../../redux/slice/authSlice";
 
 function Profile() {
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    
     const data = useSelector((state) => state.auth?.data);
 
-    
     const [imgError, setImgError] = useState(false);
+
+    useEffect(() => {
+        dispatch(getProfileAction());
+    }, []);
 
     return (
         <HomeLayout>
             <div className="min-h-screen bg-[#0a0a0f] text-white px-4 py-14">
                 <div className="max-w-4xl mx-auto">
 
-                    {/* Page heading */}
                     <h1 className="text-3xl sm:text-4xl font-extrabold mb-10">
                         My{" "}
                         <span className="bg-gradient-to-r from-yellow-400 to-yellow-500 bg-clip-text text-transparent">
@@ -30,7 +33,6 @@ function Profile() {
                         {/* LEFT — Avatar + name + role */}
                         <div className="flex flex-col items-center gap-5 bg-white/[0.03] border border-white/10 rounded-2xl p-8">
 
-                            {/* Avatar */}
                             <div className="relative group">
                                 {!imgError && data?.avtar?.secure_url ? (
                                     <img
@@ -46,7 +48,6 @@ function Profile() {
                                 )}
                             </div>
 
-                            {/* Name */}
                             <div className="text-center">
                                 <h2 className="text-xl font-bold text-white">
                                     {`${data?.firstName || ""} ${data?.lastName || ""}`.trim() || "User"}
@@ -56,7 +57,6 @@ function Profile() {
                                 </p>
                             </div>
 
-                            {/* Role badge */}
                             <span
                                 className={`text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full border ${
                                     data?.role === "admin"
@@ -67,7 +67,6 @@ function Profile() {
                                 {data?.role ?? ""}
                             </span>
 
-                            {/* Edit profile button */}
                             <button
                                 onClick={() => {
                                     if (!data) return;
@@ -86,14 +85,12 @@ function Profile() {
                         {/* RIGHT — Details */}
                         <div className="md:col-span-2 flex flex-col gap-5">
 
-                            {/* Info card */}
                             <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-6">
                                 <h3 className="text-xs font-semibold uppercase tracking-widest text-white/30 mb-5">
                                     Account Information
                                 </h3>
 
                                 <div className="flex flex-col divide-y divide-white/[0.06]">
-
                                     {[
                                         {
                                             icon: (
@@ -103,10 +100,7 @@ function Profile() {
                                                 </svg>
                                             ),
                                             label: "Full Name",
-                                            value:
-                                
-                                                `${data?.firstname || ""} ${data?.lastname || ""}`.trim() ||
-                                                "N/A",
+                                            value: `${data?.firstname || ""} ${data?.lastname || ""}`.trim() || "N/A",
                                         },
                                         {
                                             icon: (
@@ -143,6 +137,16 @@ function Profile() {
                                                   })
                                                 : "N/A",
                                         },
+                                        {
+                                            icon: (
+                                                <svg width="16" height="16" fill="none" stroke="#eab308" strokeWidth="2" viewBox="0 0 24 24">
+                                                    <path d="M12 2L2 7l10 5 10-5-10-5z" />
+                                                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5" />
+                                                </svg>
+                                            ),
+                                            label: "Subscription",
+                                            value: data?.subscription?.status === "active" ? "✅ Active" : "❌ Inactive",
+                                        },
                                     ].map((item) => (
                                         <div key={item.label} className="flex items-center gap-4 py-4 first:pt-0 last:pb-0">
                                             <div className="w-8 h-8 rounded-lg bg-yellow-500/10 border border-yellow-500/20 flex items-center justify-center shrink-0">
@@ -161,7 +165,6 @@ function Profile() {
                                 </div>
                             </div>
 
-                            {/* Action buttons */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                 <button
                                     onClick={() => {
@@ -188,7 +191,6 @@ function Profile() {
                                     Browse Courses
                                 </button>
                             </div>
-
                         </div>
                     </div>
                 </div>

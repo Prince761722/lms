@@ -45,48 +45,37 @@ function App() {
 
         {/* AUTHENTICATED USERS (ALL ROLES) */}
         <Route element={<RequireAuth allowedRoles={["user", "admin", "creator"]} />}>
-
           <Route path="/user/profile" element={<Profile />} />
           <Route path="/user/profile/edit" element={<EditProfile />} />
-
         </Route>
 
-        {/* USER ONLY (paid features) */}
-        <Route element={<RequireAuth allowedRoles={["user"]} />}>
-
+        {/* ✅ FIXED — user + creator can checkout (creators need subscription too) */}
+        <Route element={<RequireAuth allowedRoles={["user", "creator"]} />}>
           <Route path="/payment/checkout" element={<Checkout />} />
           <Route path="/payment/success" element={<PaymentSucess />} />
           <Route path="/payment/failed" element={<PaymentFailed />} />
-
         </Route>
 
         {/* USER + CREATOR + ADMIN (course access) */}
         <Route element={<RequireAuth allowedRoles={["user", "creator", "admin"]} />}>
-
           <Route path="/lecture/:courseId" element={<DisplayLeacture />} />
           <Route path="/lecture/watch/:courseId/:lectureId" element={<WatchLecture />} />
-
         </Route>
 
         {/* CREATOR + ADMIN */}
         <Route element={<RequireAuth allowedRoles={["creator", "admin"]} />}>
-
           <Route path="/course/create" element={<CreateCourse />} />
           <Route path="/lecture/add/:courseId" element={<AddLecture />} />
-
         </Route>
 
         {/* ADMIN ONLY */}
         <Route element={<RequireAuth allowedRoles={["admin"]} />}>
-
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
-
         </Route>
+
+        {/* ✅ FIXED — removed JS comment inside JSX */}
         <Route element={<RequireAuth allowedRoles={["creator"]} />}>
-
-          // inside CREATOR + ADMIN route group
           <Route path="/creator/dashboard" element={<CreatorDashboard />} />
-
         </Route>
 
       </Routes>

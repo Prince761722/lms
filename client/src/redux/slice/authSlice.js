@@ -78,6 +78,22 @@ export const updateProfileAction = createAsyncThunk(
     }
 );
 
+//get profile
+
+export const getProfileAction = createAsyncThunk(
+    "auth/getProfile",
+    async (_, { rejectWithValue }) => {
+        try {
+            const response = await axiosInstance.get("/user/me"); 
+            return response.data;
+        } catch (error) {
+            return rejectWithValue(
+                error?.response?.data?.message || "Failed to fetch profile"
+            );
+        }
+    }
+);
+
 //  INITIAL STATE 
 const initialState = {
     isLoggedIn: localStorage.getItem("isLoggedIn") === "true" || false,
@@ -170,7 +186,7 @@ const authSlice = createSlice({
                 state.role = "";
                 state.token = null;  // ← clear token
 
-                // ✅ Clear token from axios
+        
                 setAuthToken(null);
 
                 localStorage.removeItem("isLoggedIn");
@@ -201,7 +217,16 @@ const authSlice = createSlice({
                 state.loading = false;
                 state.error = action.payload;
             });
+
+             builder
+            .addCase(getProfileAction.fulfilled, (state, action) => {
+                const user = action.payload.user;
+                state.data = { ...user };
+                localStorage.setItem("data", JSON.stringify(user));
+            });
     },
+
+    
 });
 
 export default authSlice.reducer;

@@ -1,6 +1,7 @@
 import appError from "../utils/errorUtil.js";
 import jwt from "jsonwebtoken";
 import Course from '../models/courseModel.js';
+import User from '../models/userModel.js'; // ✅ NEW
 
 const isLoggedIn = (req, res, next) => {
   try {
@@ -26,9 +27,14 @@ const authorizedRoles = (...roles) => async (req, res, next) => {
   next();
 };
 
-const isSubscribed = (req, res, next) => {
+// ✅ FIXED — fetch fresh user from DB instead of relying on JWT
+const isSubscribed = async (req, res, next) => {
   try {
-    const user = req.user;
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return next(new appError("User not found", 404));
+    }
 
     if (user.role === "admin") return next();
 
@@ -44,7 +50,7 @@ const isSubscribed = (req, res, next) => {
 
 const isCourseOwner = async (req, res, next) => {
   try {
-    const courseId = req.params.id || req.params.courseId; // ✅ FIXED
+    const courseId = req.params.id || req.params.courseId;
 
     const course = await Course.findById(courseId);
 
@@ -62,10 +68,16 @@ const isCourseOwner = async (req, res, next) => {
   }
 };
 
+// ✅ FIXED — fetch fresh user from DB instead of relying on JWT
 const isSubscribedOrOwner = async (req, res, next) => {
   try {
-    const user = req.user;
-    const courseId = req.params.id || req.params.courseId; // ✅ FIXED
+    const freshUser = await User.findById(req.user.id);
+
+    if (!freshUser) {
+      return next(new appError("User not found", 404));
+    }
+
+    const courseId = req.params.id || req.params.courseId;
 
     const course = await Course.findById(courseId);
 
@@ -73,14 +85,11 @@ const isSubscribedOrOwner = async (req, res, next) => {
       return next(new appError("Course not found", 404));
     }
 
-    //  Admin bypass
-    if (user.role === "admin") return next();
+    if (freshUser.role === "admin") return next();
 
-    //  Owner
-    if (course.createdBy.toString() === user.id) return next();
+    if (course.createdBy.toString() === req.user.id) return next();
 
-    //  Subscribed user
-    if (user.subscription?.status === "active") return next();
+    if (freshUser.subscription?.status === "active") return next();
 
     return next(new appError("You are not subscribed to this course", 403));
 
@@ -92,7 +101,7 @@ const isSubscribedOrOwner = async (req, res, next) => {
 const isAdminOrOwner = async (req, res, next) => {
   try {
     const user = req.user;
-    const courseId = req.params.id || req.params.courseId; 
+    const courseId = req.params.id || req.params.courseId;
 
     const course = await Course.findById(courseId);
 

@@ -9,6 +9,8 @@ import {
   verifyPayment,
 } from "../../redux/slice/razorpaySlice";
 
+import { getProfileAction } from "../../redux/slice/authSlice";
+
 // =======================
 // LOAD RAZORPAY SCRIPT
 // =======================
@@ -89,7 +91,7 @@ function Checkout() {
       const options = {
         key: razorpayKey,
         subscription_id,
-        name: "Your Platform",
+        name: "LMS",
         description: "Premium Subscription",
         theme: { color: "#3399cc" },
 
@@ -103,7 +105,7 @@ function Checkout() {
           const verifyRes = await dispatch(
             verifyPayment({
               razorpay_payment_id: response.razorpay_payment_id,
-              razorpay_subscription_id: subscription_id, // ✅ FIXED
+              razorpay_subscription_id: subscription_id, 
               razorpay_signature: response.razorpay_signature,
             })
           );
@@ -112,6 +114,7 @@ function Checkout() {
 
           if (verifyRes.payload?.success) {
             toast.success("Payment successful!");
+            await dispatch(getProfileAction());
             navigate("/");
           } else {
             toast.error("Payment verification failed");
