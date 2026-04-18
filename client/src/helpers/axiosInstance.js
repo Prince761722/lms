@@ -1,16 +1,22 @@
 import axios from "axios";
 
-const BASE_URL = "http://localhost:4034/api/v1";
+const BASE_URL = "/api/v1";
 
 const axiosInstance = axios.create();
 axiosInstance.defaults.baseURL = BASE_URL;
 axiosInstance.defaults.withCredentials = true;
 
-// ✅ Restore token on page refresh
-const token = localStorage.getItem("token");
-if (token) {
-    axiosInstance.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-}
+// ✅ This runs on EVERY request automatically
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem("token");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
 
 // ✅ Helper to set/clear token
 export const setAuthToken = (token) => {
